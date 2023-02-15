@@ -9,7 +9,9 @@ var categories = {}
 var sections = {}
 var editor_selection_handled = true
 var selected_properties = {}
+
 # ******************************************************************************
+
 func editor_selection_changed():
 	editor_selection_handled = false
 
@@ -133,13 +135,17 @@ func _gui_input(event, source):
 		ctx.add_icon_item(icon, 'Paste Selected Properties')
 		icon = root.get_theme_icon('Duplicate', 'EditorIcons')
 		ctx.add_icon_item(icon, 'Copy With Unique Resources')
-
-		ctx.add_separator('Copy to Clipboard')
-		icon = root.get_theme_icon('CopyNodePath', 'EditorIcons')
-		ctx.add_icon_item(icon, 'Copy Property Paths')
-		ctx.add_icon_item(icon, 'Copy Properties as Code')
-		ctx.add_icon_item(icon, 'Copy Properties as Dictionary')
-		ctx.add_icon_item(icon, 'Copy Selected Properties in PropertyList format')
+		
+		ctx.add_separator()
+		
+		var clipboard_sub = PopupMenu.new()
+		clipboard_sub.name = 'Copy to Clipboard'
+		clipboard_sub.add_item('Copy Property Paths')
+		clipboard_sub.add_item('Copy Properties as Code')
+		clipboard_sub.add_item('Copy Properties as Dictionary')
+		clipboard_sub.add_item('Copy Properties as PropertyList')
+		ctx.add_child(clipboard_sub)
+		ctx.add_submenu_item('Copy to Clipboard','Copy to Clipboard')
 
 		ctx.add_separator()
 		var test = func(x): return x.button_pressed
@@ -159,6 +165,13 @@ func _gui_input(event, source):
 				ctx.add_item('Select Entire Section')
 			if sections[source.section.name].any(test):
 				ctx.add_item('Deselect Entire Section')
+		
+		## Editor Icon Previewer Compatibility
+		if plugin.get_editor_interface().get_inspector().has_meta("CurrentTexture") and not selected_properties.is_empty():
+			ctx.add_separator()
+			icon = root.get_theme_icon('TextureRect', 'EditorIcons')
+			ctx.add_icon_item(icon, 'Paste Icon')
+		##
 		
 		var pos = root.get_global_mouse_position()
 		pos += root.get_screen_position()
@@ -194,6 +207,14 @@ func paste_data():
 				undo.add_undo_property(node, prop_name, node.get(prop_name))
 				undo.add_do_property(node, prop_name, copied_data[prop_name])
 	undo.commit_action()
+
+## Editor Icon Previewer Compatibility
+func paste_texture(texture:Texture):
+	var selection = plugin.get_editor_interface().get_selection()
+	var nodes = selection.get_selected_nodes()
+	for node in nodes:
+		for p in selected_properties:
+			node.set(p, texture)
 
 # ******************************************************************************
 
@@ -232,7 +253,7 @@ func item_selected(item):
 					out[name] = data[name]
 				else: out[name] = var_to_str(data[name])
 			DisplayServer.clipboard_set(JSON.stringify(out, '\t'))
-		'Copy Selected Properties in PropertyList format':
+		'Copy Properties as PropertyList':
 			var out = ''
 			var data = get_selected_data()
 			for name in data:
@@ -254,6 +275,8 @@ func item_selected(item):
 			sections[source.section.name].map(func(c): c.button_pressed = true)
 		'Deselect Entire Section':
 			sections[source.section.name].map(func(c): c.button_pressed = false)
+		'Paste Icon':
+			paste_texture(plugin.get_editor_interface().get_inspector().get_meta("CurrentTexture"))
 
 # ******************************************************************************
 

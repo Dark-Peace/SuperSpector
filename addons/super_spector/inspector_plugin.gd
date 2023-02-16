@@ -203,7 +203,7 @@ func paste_data():
 	undo.create_action('Set multiple properties')
 	for node in nodes:
 		for prop_name in copied_data:
-			if prop_name in node:
+			if prop_name in node and prop_name in selected_properties:
 				undo.add_undo_property(node, prop_name, node.get(prop_name))
 				undo.add_do_property(node, prop_name, copied_data[prop_name])
 	undo.commit_action()
@@ -214,7 +214,8 @@ func paste_texture(texture:Texture):
 	var nodes = selection.get_selected_nodes()
 	for node in nodes:
 		for p in selected_properties:
-			node.set(p, texture)
+			if typeof(node.get(p)) == TYPE_OBJECT:
+				node.set(p, texture)
 
 # ******************************************************************************
 

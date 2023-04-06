@@ -8,4 +8,6 @@ It works by adding a checkbox next to all properties in the inspector and by add
 
 It's very easy to install and use but you can still read the documentation here : https://docs.google.com/document/d/1y2aPsn72dOxQ-wBNGqLlQvrw9-SV_z12a1MradBglF4/edit?usp=sharing
 
+It's also compatible with the [Editor Icon Previewer](https://godotengine.org/asset-library/asset/1664) plugin to make it possible to copy an cion directly to an inspector property.
+
 ![Icon_SuperSpector](https://user-images.githubusercontent.com/74102789/219342609-8bdde3f4-ac03-4fdb-83d7-2580d15d1556.png)
